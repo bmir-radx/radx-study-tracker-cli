@@ -29,6 +29,10 @@ public class StudyDatabase {
         return new StudyDatabase(recs);
     }
 
+    public List<StudyRecord> getAllStudyRecords() {
+        return recordsByPhsNumber.values().stream().toList();
+    }
+
     /**
      * Retrieves the study record associated with the specified PHS number from the database.
      *

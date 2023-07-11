@@ -8,7 +8,7 @@
 		<version>3.0.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>edu.stanford.radx</groupId>
+	<groupId>edu.stanford.bmir.radx</groupId>
 	<artifactId>radx-study-tracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>radx-study-tracker</name>
@@ -32,6 +32,12 @@
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
 			<version>3.0.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.9.0</version>
 		</dependency>
 
 		<dependency>

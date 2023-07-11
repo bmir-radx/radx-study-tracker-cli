@@ -1,12 +1,16 @@
 package edu.stanford.radx.studytracker;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.stanford.radx.studytracker.cli.RadXProgram;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Represents a RADx study with various properties.
@@ -26,7 +30,8 @@ public record StudyRecord(@JsonProperty("PHS Number") String phsNumber,
                           @JsonProperty("RADx Program") String radxProgram,
                           @JsonProperty("Project Title") String projectTitle,
                           @JsonProperty("Study Start Date") String studyStartDate,
-                          @JsonProperty("Study End Date") String studyEndDate) {
+                          @JsonProperty("Study End Date") String studyEndDate,
+                          @JsonProperty("Summary") @JsonAlias("Study Details Summary") String summary) {
 
 
     /**
@@ -65,5 +70,11 @@ public record StudyRecord(@JsonProperty("PHS Number") String phsNumber,
                 return Optional.empty();
             }
         }
+    }
+
+    public Optional<RadXProgram> getRadXProgram() {
+        return Stream.of(RadXProgram.values())
+                .filter(prog -> prog.getLabel().equalsIgnoreCase(radxProgram))
+                .findFirst();
     }
 }
