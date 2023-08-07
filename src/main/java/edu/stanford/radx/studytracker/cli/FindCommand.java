@@ -21,10 +21,10 @@ import static picocli.CommandLine.*;
 @Command(name = "find", description = "Finds a study by searching the specified fields")
 public class FindCommand implements CliCommand {
 
-    @Option(names = "--any-match", description = "A search string that must be contained within either the PHS Number or Study Title fields")
+    @Option(names = "--any", description = "A search string that must be contained within either the PHS Number or Study Title fields")
     protected String anyFieldSpec = "";
 
-    @Option(names = "--phs-match", description = "A search string that must be contained within the PHS Number field")
+    @Option(names = "--phs", description = "A search string that must be contained within the PHS Number field")
     protected String phsFieldSpec = "";
 
 
