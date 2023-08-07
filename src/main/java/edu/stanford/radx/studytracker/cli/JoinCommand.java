@@ -1,5 +1,6 @@
 package edu.stanford.radx.studytracker.cli;
 
+import edu.stanford.radx.studytracker.JoinFields;
 import edu.stanford.radx.studytracker.StudyDatabaseFactory;
 import edu.stanford.radx.studytracker.StudyRecord;
 import org.apache.commons.csv.CSVFormat;
@@ -12,6 +13,7 @@ import picocli.CommandLine.Option;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,7 +38,11 @@ public class JoinCommand implements CliCommand {
     @Option(names = "--field-id", required = true)
     String fieldId;
 
+    @Option(names = "--joined-fields")
+    List<JoinFields> joinFields = List.of(JoinFields.PROGRAM, JoinFields.TITLE);
+
     private final StudyDatabaseFactory studyDatabaseFactory;
+
 
     public JoinCommand(StudyDatabaseFactory studyDatabaseFactory) {
         this.studyDatabaseFactory = studyDatabaseFactory;
@@ -45,12 +51,9 @@ public class JoinCommand implements CliCommand {
     @Override
     public Integer call() throws Exception {
         var csv = Files.readString(csvFile);
-        System.err.println("Read " + csv.length() + " characters");
 
         var csvParser = new CSVParser(new StringReader(csv),
                                       CSVFormat.DEFAULT);
-
-        System.out.println(csvParser);
 
         var studyDatabase = studyDatabaseFactory.getStudyDatabase();
         var parsedRecords = csvParser.getRecords();
@@ -69,11 +72,16 @@ public class JoinCommand implements CliCommand {
         var csvWriter = new CSVPrinter(buffer, CSVFormat.DEFAULT);
 
         var records = parsedRecords;
-        System.err.println("There are " + records.size() + " records");
         var joinedHeaders = new ArrayList<>(parsedRecords.get(0).stream().toList());
-        joinedHeaders.add("Program");
-        joinedHeaders.add("Title");
-        joinedHeaders.add("Summary");
+        if (joinFields.contains(JoinFields.PROGRAM)) {
+            joinedHeaders.add("Program");
+        }
+        if (joinFields.contains(JoinFields.TITLE)) {
+            joinedHeaders.add("Title");
+        }
+        if (joinFields.contains(JoinFields.SUMMARY)) {
+            joinedHeaders.add("Summary");
+        }
         csvWriter.printRecord(joinedHeaders);
         records.stream()
                 .skip(1)
@@ -84,9 +92,17 @@ public class JoinCommand implements CliCommand {
                     if(phsId != null && !phsId.isBlank()) {
                         var r = studyDatabase.getStudyRecord(phsId);
                         r.ifPresentOrElse(theR -> {
-                            joined.add(theR.radxProgram());
-                            joined.add(theR.projectTitle());
-                            joined.add(theR.summary());
+                            if (joinFields.contains(JoinFields.PROGRAM)) {
+                                joined.add(theR.radxProgram());
+                            }
+
+                            if (joinFields.contains(JoinFields.TITLE)) {
+                                joined.add(theR.projectTitle());
+                            }
+
+                            if (joinFields.contains(JoinFields.SUMMARY)) {
+                                joined.add(theR.summary());
+                            }
                         }, () -> pad(joined));
                     }
                     else {
@@ -95,7 +111,7 @@ public class JoinCommand implements CliCommand {
                     try {
                         csvWriter.printRecord(joined);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw new UncheckedIOException(e);
                     }
                 });
         csvWriter.flush();
