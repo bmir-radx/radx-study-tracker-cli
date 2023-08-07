@@ -16,6 +16,10 @@ public class StudyRecordsPrinter {
 
     protected static final String FORMAT = "%s\t%-10s\t%-10s\t%-10s\t%s\n";
 
+    private static boolean isConsole() {
+        return System.console() != null;
+    }
+
     public void printStudyRecords(List<StudyRecord> records,
                                   boolean groupByProgram) {
         System.err.printf("There are %d records\n", records.size());
@@ -23,7 +27,7 @@ public class StudyRecordsPrinter {
         records
                 .stream()
                 .sorted(getComparator(groupByProgram))
-                .map(this::formateRecord)
+                .map(this::formatRecord)
                 .forEach(System.err::println);
     }
 
@@ -37,7 +41,7 @@ public class StudyRecordsPrinter {
         }
     }
 
-    private String formateRecord(StudyRecord rec) {
+    private String formatRecord(StudyRecord rec) {
         var startDate = rec.getLocalStartDate().map(Object::toString).orElse("");
         var endDate = rec.getLocalEndDate().map(Object::toString).orElse("");
         return String.format(FORMAT, rec.phsNumber(), rec.radxProgram(), startDate, endDate, rec.projectTitle());
