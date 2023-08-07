@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>edu.stanford.bmir.radx</groupId>
 	<artifactId>radx-study-tracker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.9.0</version>
 	<name>radx-study-tracker</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
