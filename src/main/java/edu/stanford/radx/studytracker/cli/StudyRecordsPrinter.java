@@ -1,8 +1,12 @@
 package edu.stanford.radx.studytracker.cli;
 
 import edu.stanford.radx.studytracker.StudyRecord;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -22,13 +26,33 @@ public class StudyRecordsPrinter {
 
     public void printStudyRecords(List<StudyRecord> records,
                                   boolean groupByProgram) {
-        System.err.printf("There are %d records\n", records.size());
-        System.err.printf(FORMAT, "PHS Number", "Program", "Start", "End", "Title");
-        records
-                .stream()
-                .sorted(getComparator(groupByProgram))
-                .map(this::formatRecord)
-                .forEach(System.err::println);
+        if(isConsole()) {
+            System.err.printf("There are %d records\n", records.size());
+            System.err.printf(FORMAT, "PHS Number", "Program", "Start", "End", "Title");
+            records
+                    .stream()
+                    .sorted(getComparator(groupByProgram))
+                    .map(this::formatRecord)
+                    .forEach(System.err::println);
+        }
+        else {
+            try {
+                var csvPrinter = new CSVPrinter(System.out, CSVFormat.DEFAULT);
+                csvPrinter.printRecord("PHS Number", "Program", "Start", "End", "Title");
+                records.stream()
+                        .sorted(getComparator(groupByProgram))
+                        .forEach(rec -> {
+                            try {
+                                csvPrinter.printRecord(rec.phsNumber(), rec.radxProgram(), rec.studyStartDate(), rec.studyEndDate(), rec.projectTitle());
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+                csvPrinter.flush();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     private Comparator<StudyRecord> getComparator(boolean groupByProgram) {
